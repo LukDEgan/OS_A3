@@ -16,6 +16,7 @@ all: $(TARGET)
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) -o $@ $^
 
+
 # Clean up build artifacts
 clean:
 	rm -f $(TARGET) *.o ./*.txt

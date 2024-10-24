@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #define SOCKETERROR (-1)
-#define SERVERPORT 1234
+
 #define BUFFERSIZE 1024
 #define SERVERBACKLOG 10
 #define MAXBOOKS 50
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
   }
   book_list.book_heads = malloc(MAXBOOKS * sizeof(Node *));
   book_list.book_count = 0;
-  int server_socket = setup_server(SERVERPORT, SERVERBACKLOG);
+  int server_socket = setup_server(port, SERVERBACKLOG);
 
   while (1) {
     printf("waiting for connection...\n");
@@ -95,7 +95,7 @@ int setup_server(int port, int log) {
   // Initialize address struct
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = INADDR_ANY;
-  server_addr.sin_port = htons(SERVERPORT);
+  server_addr.sin_port = htons(port);
 
   check(
       bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)),
