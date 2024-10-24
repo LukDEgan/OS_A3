@@ -16,9 +16,12 @@ all: $(TARGET)
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) -o $@ $^
 
+# Run the server with specified arguments (change as needed)
+run: $(TARGET)
+	./$(TARGET) -l 12345 -p "happy"  # Example command; modify arguments as needed
 
 # Clean up build artifacts
 clean:
 	rm -f $(TARGET) *.o ./*.txt
 
-.PHONY: all clean
+.PHONY: all clean run
