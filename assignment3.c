@@ -35,8 +35,31 @@ typedef struct BookList {
 
 pthread_mutex_t book_lock = PTHREAD_MUTEX_INITIALIZER;
 BookList book_list;
-
+char *search_pattern;  // Global variable to store the search pattern
 int main(int argc, char *argv[]) {
+  int port = 0;  // Initialize port number
+
+  // Parse command line arguments using getopt
+  int opt;
+  while ((opt = getopt(argc, argv, "l:p:")) != -1) {
+    switch (opt) {
+      case 'l':
+        port = atoi(optarg);
+        break;
+      case 'p':
+        search_pattern = strdup(optarg);  // Duplicate the pattern
+        break;
+      default:
+        fprintf(stderr, "Usage: %s -l <port> -p <pattern>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+  }
+
+  // Ensure both port and search pattern are provided
+  if (port == 0 || search_pattern == NULL) {
+    fprintf(stderr, "Error: Port and search pattern must be specified.\n");
+    exit(EXIT_FAILURE);
+  }
   book_list.book_heads = malloc(MAXBOOKS * sizeof(Node *));
   book_list.book_count = 0;
   int server_socket = setup_server(SERVERPORT, SERVERBACKLOG);

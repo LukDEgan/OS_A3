@@ -18,6 +18,6 @@ $(TARGET): $(SRC)
 
 # Clean up build artifacts
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) *.o ./*.txt
 
 .PHONY: all clean
