@@ -7,9 +7,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-
 #define SOCKETERROR (-1)
-#define SERVERPORT 2000
+#define SERVERPORT 1234
 #define BUFFERSIZE 1024
 #define SERVERBACKLOG 10
 #define MAXBOOKS 50
@@ -86,9 +85,9 @@ void *handle_connection(void *p_client_socket) {
   free(p_client_socket);
 
   char buffer[BUFFERSIZE];
-  char *line_buffer = NULL;  // Buffer to store incomplete lines
+  char *incomplete_line_buffer = NULL;  // Buffer to store incomplete lines
   int bytes_read;
-  size_t line_buffer_size = 0;  // Size of the line buffer
+  size_t incomplete_line_buffer_size = 0;  // Size of the line buffer
 
   // Lock to update book list safely
   pthread_mutex_lock(&book_lock);
@@ -107,20 +106,24 @@ void *handle_connection(void *p_client_socket) {
       // Allocate memory for the complete line
       size_t line_length = newline - start;  // Exclude the newline character
 
-      // Check if there's any data in line_buffer
-      if (line_buffer_size > 0) {
-        // Reallocate line_buffer to append the new line
-        line_buffer = realloc(line_buffer, line_buffer_size + line_length + 1);
-        memcpy(line_buffer + line_buffer_size, start, line_length);
-        line_buffer[line_buffer_size + line_length] = '\0';  // Null-terminate
+      // Check if there's any data in incomplete_line_buffer
+      if (incomplete_line_buffer_size > 0) {
+        // Reallocate incomplete_line_buffer to append the new line
+        incomplete_line_buffer =
+            realloc(incomplete_line_buffer,
+                    incomplete_line_buffer_size + line_length + 1);
+        memcpy(incomplete_line_buffer + incomplete_line_buffer_size, start,
+               line_length);
+        incomplete_line_buffer[incomplete_line_buffer_size + line_length] =
+            '\0';  // Null-terminate
 
         // Add the complete line
-        add_line(line_buffer, current_book_index);
+        add_line(incomplete_line_buffer, current_book_index);
 
         // Clear the buffer
-        free(line_buffer);
-        line_buffer = NULL;
-        line_buffer_size = 0;
+        free(incomplete_line_buffer);
+        incomplete_line_buffer = NULL;
+        incomplete_line_buffer_size = 0;
       } else {
         // No previous data, add directly
         char *complete_line = strndup(start, line_length);  // Exclude newline
@@ -133,16 +136,18 @@ void *handle_connection(void *p_client_socket) {
 
     // If there's remaining data in the buffer (a partial line), save it
     if (*start != '\0') {
-      line_buffer_size = strlen(start);
-      line_buffer = realloc(line_buffer, line_buffer_size + 1);
-      strcpy(line_buffer, start);  // Copy incomplete line to buffer
+      incomplete_line_buffer_size = strlen(start);
+      incomplete_line_buffer =
+          realloc(incomplete_line_buffer, incomplete_line_buffer_size + 1);
+      strcpy(incomplete_line_buffer, start);  // Copy incomplete line to buffer
     }
   }
 
-  // If there's leftover data in the line_buffer after the loop, add it
-  if (line_buffer_size > 0) {
-    add_line(line_buffer, current_book_index);
-    free(line_buffer);
+  // If there's leftover data in the incomplete_line_buffer after the loop, add
+  // it
+  if (incomplete_line_buffer_size > 0) {
+    add_line(incomplete_line_buffer, current_book_index);
+    free(incomplete_line_buffer);
   }
 
   close(client_socket);
