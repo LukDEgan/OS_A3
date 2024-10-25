@@ -399,36 +399,8 @@ void add_line(char *line, int book_index) {
   } else {
     sprintf(filename, "book_%d.txt", book_list.book_count);
   }
-  FILE *file = fopen(filename, "w");
+  FILE *file = fopen(filename, "a");
   fprintf(file, "%s\n", line);
   fclose(file);
-  pthread_mutex_unlock(&book_lock);
-}
-void write_book_to_file(char *filename, int book_index) {
-  pthread_mutex_lock(&book_lock);
-
-  // Create the filename using book_index
-
-  // Open the file
-  FILE *file = fopen(filename, "w");
-  if (!file) {
-    perror("Error opening file");
-    pthread_mutex_unlock(&book_lock);
-    return;
-  }
-
-  // Write the content of the book to the file (using book_next)
-  Node *current = book_list.book_heads[book_index];
-  while (current != NULL) {
-    fprintf(file, "%s\n", current->line);
-    current = current->book_next;
-  }
-
-  fclose(file);
-  printf(
-      "-----------------------------\nThead: Finished writing Book %d to file "
-      "%s\n",
-      book_index + 1, filename);
-
   pthread_mutex_unlock(&book_lock);
 }
