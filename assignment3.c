@@ -388,7 +388,7 @@ void add_line(char *line, int book_index) {
   pthread_mutex_unlock(&book_lock);
 }
 void write_book_to_file(int book_index) {
-  pthread_mutex_lock(&book_lock);
+  // pthread_mutex_lock(&book_lock);
 
   // Create the filename using book_index
   char filename[50];
@@ -419,5 +419,5 @@ void write_book_to_file(int book_index) {
       "%s\n",
       book_index + 1, filename);
 
-  pthread_mutex_unlock(&book_lock);
+  // pthread_mutex_unlock(&book_lock);
 }
