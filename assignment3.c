@@ -392,7 +392,11 @@ void write_book_to_file(int book_index) {
 
   // Create the filename using book_index
   char filename[50];
-  sprintf(filename, "book_%d.txt", book_index + 1);  // book_index is zero-based
+  if (book_index + 1 < 10) {
+    sprintf(filename, "book_0%d.txt", book_index + 1);
+  } else {
+    sprintf(filename, "book_%d.txt", book_index + 1);
+  }
 
   // Open the file
   FILE *file = fopen(filename, "w");
