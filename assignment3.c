@@ -182,11 +182,15 @@ void *analyze_frequency() {
 
              search_pattern);
     }
-    for (int i = 0; i < book_list.book_count; i++) {
+    for (int i = 0; i < book_count; i++) {
       int book_index = sorted_array[i];
-      char *book_title = book_list.book_heads[sorted_array[i] - 1]->line;
-      printf("%d --> Book: %d, Title: '%s', Pattern: '%s', Frequency: %d\n",
-             i + 1, book_index, book_title, search_pattern, *results[i]);
+      if (book_list.book_heads[sorted_array[i] - 1] != NULL) {
+        char *book_title = book_list.book_heads[sorted_array[i] - 1]->line;
+        printf("%d --> Book: %d, Title: '%s', Pattern: '%s', Frequency: %d\n",
+               i + 1, book_index, book_title, search_pattern, *results[i]);
+      } else {
+        printf("%d --> Book: %d has no contents\n", i + 1, book_index);
+      }
     }
 
     pthread_mutex_unlock(&analysis_lock);
@@ -348,6 +352,7 @@ void add_line(char *line, int book_index) {
   if (line_length > 0 && line[line_length - 1] == '\n') {
     line_length--;  // Exclude the newline character
   }
+
   new_node->line =
       strndup(line, line_length);  // Duplicate the line without newline
   if (!new_node->line) {
