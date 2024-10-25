@@ -17,7 +17,7 @@
 void *handle_connection(void *p_client_socket);
 int check(int exp, const char *msg);
 void add_line(char *line, int book_index);
-void write_book_to_file(int book_index);
+void write_book_to_file(char *filename, int book_index);
 int setup_server(int port, int log);
 int accept_new_connection(int server_socket);
 void *analyze_frequency();
@@ -235,6 +235,14 @@ void *handle_connection(void *p_client_socket) {
   pthread_mutex_lock(&book_lock);
   int current_book_index =
       book_list.book_count++;  // Get the current book index and increment
+  char filename[50];
+  if (current_book_index + 1 < 10) {
+    sprintf(filename, "book_0%d.txt", current_book_index + 1);
+  } else {
+    sprintf(filename, "book_%d.txt", current_book_index + 1);
+  }
+  FILE *file = fopen(filename, "w");
+  fclose(file);
   pthread_mutex_unlock(&book_lock);
 
   // Read from client socket
@@ -304,7 +312,7 @@ void *handle_connection(void *p_client_socket) {
   close(client_socket);
 
   // Write the entire book to a file once all data is received
-  write_book_to_file(current_book_index);
+  write_book_to_file(filename, current_book_index);
 
   return NULL;
 }
@@ -387,16 +395,10 @@ void add_line(char *line, int book_index) {
       pline, book_list.book_count);
   pthread_mutex_unlock(&book_lock);
 }
-void write_book_to_file(int book_index) {
-  // pthread_mutex_lock(&book_lock);
+void write_book_to_file(char *filename, int book_index) {
+  pthread_mutex_lock(&book_lock);
 
   // Create the filename using book_index
-  char filename[50];
-  if (book_index + 1 < 10) {
-    sprintf(filename, "book_0%d.txt", book_index + 1);
-  } else {
-    sprintf(filename, "book_%d.txt", book_index + 1);
-  }
 
   // Open the file
   FILE *file = fopen(filename, "w");
@@ -419,5 +421,5 @@ void write_book_to_file(int book_index) {
       "%s\n",
       book_index + 1, filename);
 
-  // pthread_mutex_unlock(&book_lock);
+  pthread_mutex_unlock(&book_lock);
 }
