@@ -312,7 +312,7 @@ void *handle_connection(void *p_client_socket) {
   close(client_socket);
 
   // Write the entire book to a file once all data is received
-  write_book_to_file(filename, current_book_index);
+  // write_book_to_file(filename, current_book_index);
 
   return NULL;
 }
@@ -393,6 +393,15 @@ void add_line(char *line, int book_index) {
       "--------------------------\nThread: Added new line :\n'%s'\nto book %d "
       "in list\n",
       pline, book_list.book_count);
+  char filename[50];
+  if (book_list.book_count + 2 < 10) {
+    sprintf(filename, "book_0%d.txt", book_list.book_count);
+  } else {
+    sprintf(filename, "book_%d.txt", book_list.book_count);
+  }
+  FILE *file = fopen(filename, "w");
+  fprintf(file, "%s\n", line);
+  fclose(file);
   pthread_mutex_unlock(&book_lock);
 }
 void write_book_to_file(char *filename, int book_index) {
